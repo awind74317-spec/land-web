@@ -4,27 +4,25 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>地政謄本資訊辨識製表系統</title>
-  <link rel="stylesheet" href="./style.css?v=20260911-1605" />
+  <link rel="stylesheet" href="./style.css?v=20260911-1648" />
 </head>
 <body>
   <main class="app-shell">
     <section class="main-card">
-      <h1 class="page-title">
-        <span class="title-icon">▦</span>
-        地政謄本資訊辨識製表系統
-      </h1>
+      <h1 class="page-title"><span class="title-icon">▦</span>地政謄本資訊辨識製表系統</h1>
 
       <ul class="intro-list">
-        <li><strong>解析檔案：</strong>一次選取多份地政謄本與異動索引 PDF，點擊「執行解析」。</li>
-        <li><strong>異動索引：</strong>同批檔案會依地號／建號自動配對；有配對資料時可直接查看異動歷程。</li>
-        <li><strong>匯出資料：</strong>確認解析結果後，可將目前表格匯出 CSV。</li>
+        <li><strong>自動載入：</strong>每次開啟頁面，會自動載入本機資料庫中的所有資料。</li>
+        <li><strong>解析檔案：</strong>點擊「執行解析」來處理新的 PDF，結果會暫時顯示在表格中。</li>
+        <li><strong>更新資料庫：</strong>確認解析結果無誤後，點擊「更新本機資料庫」將新資料存入本瀏覽器。</li>
+        <li><strong>複合查詢：</strong>使用下方查詢區塊，可對整個本機資料庫進行篩選。</li>
       </ul>
 
       <div class="notice notice-amber">
         <div class="notice-title">⚠️ 重要限制與提醒</div>
         <ul>
           <li>請使用「地政謄本系統」原始 PDF；不支援整頁掃描或拍照檔。</li>
-          <li>異動索引若含圖片型權利人文字，目前雲端 OCR 仍持續與本機版對齊；文字層資料會先依本機規則解析。</li>
+          <li>可同批加入謄本與異動索引，系統會依地號／建號自動配對；圖片型權利人暫不做 OCR，無文字層時維持未載明。</li>
         </ul>
       </div>
 
@@ -32,6 +30,8 @@
         <div class="notice-title">🚩 風險判定說明</div>
         <div>系統會將以下內容視為風險項目並顯示警示：<strong>流抵、查封、限制登記、套繪、假扣押、假處分、預告登記</strong>。</div>
       </div>
+
+      <div class="local-info">ℹ️「更新本機資料庫」與「清空本機資料庫」僅作用於本瀏覽器的本機資料，不會同步到其他電腦或其他使用者。</div>
 
       <section class="action-panel">
         <div class="action-grid">
@@ -41,47 +41,40 @@
             <button id="recognize" class="ui-btn ui-btn-primary span-4" type="button">→ 執行解析</button>
           </div>
           <div class="action-row">
+            <button id="updateDatabase" class="ui-btn ui-btn-secondary span-3" type="button">▣ 更新本機資料庫</button>
             <button id="downloadCsv" class="ui-btn ui-btn-secondary span-2" type="button">⇩ 匯出 CSV</button>
             <button id="openTemplate" class="ui-btn ui-btn-secondary span-3" type="button">⚙ 自定義表格</button>
-            <button id="clear" class="ui-btn ui-btn-danger span-2" type="button">清除目前結果</button>
+            <button id="clearDatabase" class="ui-btn ui-btn-danger span-2" type="button">清空本機資料庫</button>
           </div>
         </div>
       </section>
 
       <section class="query-panel">
-        <div class="query-grid">
+        <div class="query-grid query-grid-8">
           <input id="ownerQuery" class="ui-control" placeholder="所有權人" />
           <input id="ownerIdQuery" class="ui-control" placeholder="所有權人證號" />
-          <input id="addressQuery" class="ui-control" placeholder="地址／地段／地號" />
+          <input id="addressQuery" class="ui-control" placeholder="地址／地段" />
+          <input id="preReviewCaseNoQuery" class="ui-control" placeholder="初審單號" />
+          <input id="dateStartQuery" class="ui-control" placeholder="建檔日起，例如 2026-09-01" />
+          <input id="dateEndQuery" class="ui-control" placeholder="建檔日迄，例如 2026-09-30" />
           <select id="riskQuery" class="ui-control">
-            <option value="">全部風險</option>
-            <option value="yes">僅顯示風險</option>
-            <option value="no">僅顯示無風險</option>
+            <option value="">全部風險</option><option value="yes">僅顯示風險</option><option value="no">僅顯示無風險</option>
           </select>
-          <button id="clearQuery" class="ui-btn ui-btn-secondary" type="button">清除查詢</button>
+          <select id="sortQuery" class="ui-control">
+            <option value="query_time_desc">謄本日期新→舊</option>
+            <option value="owner_id_asc">所有權人證號小→大</option>
+            <option value="owner_id_desc">所有權人證號大→小</option>
+          </select>
         </div>
+        <div class="query-actions"><button id="clearQuery" class="ui-btn ui-btn-secondary" type="button">清除查詢</button></div>
       </section>
 
-      <div id="statusCard" class="status-card hidden" aria-live="polite">
-        <span id="statusDot" class="status-dot"></span>
-        <div>
-          <strong id="statusText">等待中</strong>
-          <div id="statusDetail" class="status-detail"></div>
-        </div>
-      </div>
-
+      <div id="statusCard" class="status-card hidden" aria-live="polite"><span id="statusDot" class="status-dot"></span><div><strong id="statusText">等待中</strong><div id="statusDetail" class="status-detail"></div></div></div>
       <div id="warningBox" class="warning-box hidden"></div>
 
-      <div class="table-toolbar">
-        <div id="resultSummary" class="summary">尚未解析</div>
-      </div>
-
-      <div id="mainTableContainer" class="table-container">
-        <table id="resultTable" class="result-table">
-          <thead><tr id="resultHead"></tr></thead>
-          <tbody id="resultBody"></tbody>
-        </table>
-      </div>
+      <div class="table-toolbar"><div id="resultSummary" class="summary">尚未解析</div></div>
+      <div id="mainTableContainer" class="table-container"><table id="resultTable" class="result-table"><thead><tr id="resultHead"></tr></thead><tbody id="resultBody"></tbody></table></div>
+      <div id="paginationContainer" class="pagination-container"></div>
       <div id="virtualScrollbar" class="virtual-scrollbar"><div id="virtualScrollContent"></div></div>
     </section>
   </main>
@@ -89,26 +82,11 @@
   <div id="modalOverlay" class="modal-overlay" aria-hidden="true">
     <div class="modal-content">
       <div class="modal-header">
-        <div class="modal-title-wrap">
-          <span class="modal-icon">◷</span>
-          <div>
-            <h3 id="modalTitle">異動歷程明細</h3>
-            <p id="modalSubtitle">--</p>
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button id="exportModalCsv" class="modal-export" type="button">⇩ 匯出 Excel</button>
-          <button id="closeModal" class="modal-close" type="button">×</button>
-        </div>
+        <div class="modal-title-wrap"><span class="modal-icon">◷</span><div><h3 id="modalTitle">異動歷程明細</h3><p id="modalSubtitle">--</p></div></div>
+        <div class="modal-actions"><button id="exportModalCsv" class="modal-export" type="button">⇩ 匯出 Excel</button><button id="closeModal" class="modal-close" type="button">×</button></div>
       </div>
       <div class="modal-body">
-        <table class="modal-table">
-          <thead><tr>
-            <th>登記次序</th><th>登記日期</th><th>登記原因</th><th>異動別</th>
-            <th>所有權部權利人</th><th>他項權利部權利人</th><th>說明</th><th>部別</th>
-          </tr></thead>
-          <tbody id="modalTbody"></tbody>
-        </table>
+        <table class="modal-table"><thead><tr><th>登記次序</th><th>登記日期</th><th>登記原因</th><th>異動別</th><th>所有權部權利人</th><th>他項權利部權利人</th><th>說明</th><th>部別</th></tr></thead><tbody id="modalTbody"></tbody></table>
         <div id="modalEmptyState" class="modal-empty hidden">此號碼尚無對應的異動索引資料</div>
       </div>
     </div>
@@ -116,16 +94,11 @@
 
   <div id="templateOverlay" class="modal-overlay" aria-hidden="true">
     <div class="modal-content template-modal">
-      <div class="modal-header">
-        <div><h3>自定義表格</h3><p>勾選要顯示的欄位；設定只保存在本瀏覽器。</p></div>
-        <button id="closeTemplate" class="modal-close" type="button">×</button>
-      </div>
-      <div class="modal-body">
-        <div id="columnChooser" class="column-chooser"></div>
-      </div>
+      <div class="modal-header"><div><h3>自定義表格</h3><p>勾選要顯示的欄位；設定只保存在本瀏覽器。</p></div><button id="closeTemplate" class="modal-close" type="button">×</button></div>
+      <div class="modal-body"><div id="columnChooser" class="column-chooser"></div></div>
     </div>
   </div>
 
-  <script src="./app.js?v=20260911-1605" defer></script>
+  <script src="./app.js?v=20260911-1648" defer></script>
 </body>
 </html>
