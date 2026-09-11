@@ -12,7 +12,7 @@
       <div>
         <p class="eyebrow">LAND REGISTRY OCR</p>
         <h1>地政謄本辨識</h1>
-        <p class="lead">上傳 PDF 後由私有後端解析，公開前端只負責上傳與顯示結果，不包含核心文字提取規則。</p>
+        <p class="lead">上傳 PDF 後由私有後端解析；公開前端只負責上傳、表格顯示與匯出，不包含核心文字提取規則。</p>
       </div>
       <span class="badge">公開測試版</span>
     </section>
@@ -23,7 +23,7 @@
         <input id="apiBase" type="url" autocomplete="off" />
         <button id="saveApi" class="secondary" type="button">儲存</button>
       </div>
-      <p class="hint">目前預設連到測試後端，可自行更換。</p>
+      <p class="hint">預設連到目前 Render 測試後端。</p>
     </section>
 
     <section class="card upload-card">
@@ -41,63 +41,40 @@
     </section>
 
     <section id="statusCard" class="card hidden" aria-live="polite">
-      <div class="status-line">
-        <span id="statusDot" class="status-dot"></span>
-        <strong id="statusText">等待中</strong>
-      </div>
+      <div class="status-line"><span id="statusDot" class="status-dot"></span><strong id="statusText">等待中</strong></div>
       <p id="statusDetail" class="hint"></p>
     </section>
 
     <section id="resultCard" class="card result-card hidden">
       <div class="section-head">
-        <div>
-          <h2>辨識結果</h2>
-          <p id="resultSummary" class="hint"></p>
-        </div>
+        <div><h2>辨識結果</h2><p id="resultSummary" class="hint"></p></div>
         <div class="result-actions">
           <button id="downloadCsv" class="secondary" type="button">下載 CSV</button>
           <button id="copyResult" class="secondary" type="button">複製 JSON</button>
         </div>
       </div>
-
       <div id="warningBox" class="warning-box hidden"></div>
-
       <div class="table-wrap">
         <table id="resultTable">
-          <thead>
-            <tr>
-              <th>項次</th>
-              <th>類型</th>
-              <th>所有權人</th>
-              <th>所有權人證號</th>
-              <th>縣市區／地段</th>
-              <th>主建號／地號</th>
-              <th>建物門牌／地上建號</th>
-              <th>持分</th>
-              <th>合計坪數</th>
-              <th>登記日期</th>
-              <th>登記原因</th>
-              <th>設定情形</th>
-              <th>風險提醒</th>
-              <th>謄本日期</th>
-              <th>來源檔案</th>
-            </tr>
-          </thead>
+          <thead><tr>
+            <th>項次</th><th>初審單號</th><th>類型</th><th>所有權人</th><th>所有權人證號</th><th>持分</th>
+            <th>縣市區/地段</th><th>建號:建物門牌 / 地號:地上建號</th><th>主建號/地號</th>
+            <th>【A】主建物概況</th><th>【A】合計主建物(m²)</th><th>【A】合計主建物(坪)</th>
+            <th>【B】共有建物概況</th><th>【B】合計共有面積(m²)</th><th>【B】合計共有面積(坪)</th>
+            <th>【C】車位數</th><th>【C】車權利範圍(累加)</th><th>【C】車位面積(m²)</th><th>【C】車位面積(坪)</th>
+            <th>【D】合計m²(含車)</th><th>合計坪數(含車坪)</th><th>【D】合計m²(不含車)</th><th>合計坪數(不含車)</th>
+            <th>公告現值</th><th>公告地價</th><th>【E】持分後合計m²(含車)</th><th>【E】持分後合計坪(含車)</th>
+            <th>【E】持分後m²(不含車)</th><th>【E】持分後合計坪(不含車)</th><th>純金額提取</th><th>共擔提純 (完整版)</th>
+            <th>設定情形 (H順位)</th><th>備註</th><th>【關鍵】異動索引</th><th>謄本日期</th><th>來源檔案</th><th>建檔日</th>
+          </tr></thead>
           <tbody id="resultBody"></tbody>
         </table>
       </div>
-
-      <details class="raw-panel">
-        <summary>查看原始 JSON</summary>
-        <pre id="result"></pre>
-      </details>
+      <details class="raw-panel"><summary>查看原始 JSON</summary><pre id="result"></pre></details>
     </section>
 
-    <footer>
-      <p>隱私設計：PDF 僅送往私有後端即時處理；目前 API 不主動保存原始檔。圖片型欄位與異動索引 OCR 仍在補強中。</p>
-    </footer>
+    <footer><p>PDF 僅送往私有後端即時處理；目前不主動保存原始檔。異動索引圖片 OCR 與少數特殊格式仍在對齊本機版。</p></footer>
   </main>
-
   <script src="./app.js" defer></script>
 </body>
 </html>
