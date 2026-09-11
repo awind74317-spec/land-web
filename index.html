@@ -12,7 +12,7 @@
       <div>
         <p class="eyebrow">LAND REGISTRY OCR</p>
         <h1>地政謄本辨識</h1>
-        <p class="lead">上傳 PDF 後由私有後端解析；公開前端只負責上傳、表格顯示與匯出，不包含核心文字提取規則。</p>
+        <p class="lead">可一次上傳多份謄本與異動索引 PDF；私有後端會一起解析並依地號／建號自動配對。</p>
       </div>
       <span class="badge">公開測試版</span>
     </section>
@@ -27,11 +27,11 @@
     </section>
 
     <section class="card upload-card">
-      <input id="pdfInput" type="file" accept="application/pdf,.pdf" hidden />
+      <input id="pdfInput" type="file" accept="application/pdf,.pdf" multiple hidden />
       <button id="pickFile" class="dropzone" type="button">
-        <strong>選擇地政謄本 PDF</strong>
-        <span>或將檔案拖曳到這裡</span>
-        <small>單檔 20MB 以內</small>
+        <strong>選擇多份地政謄本／異動索引 PDF</strong>
+        <span>可一次多選，或直接拖曳多個檔案到這裡</span>
+        <small>單檔 20MB 以內，最多 50 份</small>
       </button>
       <div id="fileInfo" class="file-info hidden"></div>
       <div class="actions">
@@ -73,7 +73,7 @@
       <details class="raw-panel"><summary>查看原始 JSON</summary><pre id="result"></pre></details>
     </section>
 
-    <footer><p>PDF 僅送往私有後端即時處理；目前不主動保存原始檔。異動索引圖片 OCR 與少數特殊格式仍在對齊本機版。</p></footer>
+    <footer><p>PDF 僅送往私有後端即時處理；目前不主動保存原始檔。異動索引會在同一批上傳中依地號／建號配對。</p></footer>
   </main>
   <script src="./app.js" defer></script>
 </body>
