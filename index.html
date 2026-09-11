@@ -3,78 +3,129 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>地政謄本辨識｜公開測試版</title>
-  <link rel="stylesheet" href="./style.css?v=20260911-1542" />
+  <title>地政謄本資訊辨識製表系統</title>
+  <link rel="stylesheet" href="./style.css?v=20260911-1605" />
 </head>
 <body>
-  <main class="shell">
-    <section class="hero">
-      <div>
-        <p class="eyebrow">LAND REGISTRY OCR</p>
-        <h1>地政謄本辨識</h1>
-        <p class="lead">可一次上傳多份謄本與異動索引 PDF；私有後端會一起解析並依地號／建號自動配對。</p>
+  <main class="app-shell">
+    <section class="main-card">
+      <h1 class="page-title">
+        <span class="title-icon">▦</span>
+        地政謄本資訊辨識製表系統
+      </h1>
+
+      <ul class="intro-list">
+        <li><strong>解析檔案：</strong>一次選取多份地政謄本與異動索引 PDF，點擊「執行解析」。</li>
+        <li><strong>異動索引：</strong>同批檔案會依地號／建號自動配對；有配對資料時可直接查看異動歷程。</li>
+        <li><strong>匯出資料：</strong>確認解析結果後，可將目前表格匯出 CSV。</li>
+      </ul>
+
+      <div class="notice notice-amber">
+        <div class="notice-title">⚠️ 重要限制與提醒</div>
+        <ul>
+          <li>請使用「地政謄本系統」原始 PDF；不支援整頁掃描或拍照檔。</li>
+          <li>異動索引若含圖片型權利人文字，目前雲端 OCR 仍持續與本機版對齊；文字層資料會先依本機規則解析。</li>
+        </ul>
       </div>
-      <span class="badge">公開測試版</span>
-    </section>
 
-    <section class="card compact-card">
-      <label class="label" for="apiBase">後端 API 網址</label>
-      <div class="api-row">
-        <input id="apiBase" type="url" autocomplete="off" />
-        <button id="saveApi" class="secondary" type="button">儲存</button>
+      <div class="notice notice-rose">
+        <div class="notice-title">🚩 風險判定說明</div>
+        <div>系統會將以下內容視為風險項目並顯示警示：<strong>流抵、查封、限制登記、套繪、假扣押、假處分、預告登記</strong>。</div>
       </div>
-      <p class="hint">預設連到目前 Render 測試後端。</p>
-    </section>
 
-    <section class="card upload-card">
-      <input id="pdfInput" type="file" accept="application/pdf,.pdf" multiple hidden />
-      <button id="pickFile" class="dropzone" type="button">
-        <strong>選擇多份地政謄本／異動索引 PDF</strong>
-        <span>可一次多選，或直接拖曳多個檔案到這裡</span>
-        <small>單檔 20MB 以內，最多 50 份</small>
-      </button>
-      <div id="fileInfo" class="file-info hidden"></div>
-      <div class="actions">
-        <button id="recognize" class="primary" type="button" disabled>開始辨識</button>
-        <button id="clear" class="secondary" type="button" disabled>清除</button>
-      </div>
-    </section>
+      <section class="action-panel">
+        <div class="action-grid">
+          <div class="action-row">
+            <input type="text" id="preReviewCaseNoInput" placeholder="初審單號（選填，例如 A123456）" class="ui-control span-3" />
+            <input type="file" id="pdfInput" multiple accept="application/pdf,.pdf" class="ui-control file-control span-5" />
+            <button id="recognize" class="ui-btn ui-btn-primary span-4" type="button">→ 執行解析</button>
+          </div>
+          <div class="action-row">
+            <button id="downloadCsv" class="ui-btn ui-btn-secondary span-2" type="button">⇩ 匯出 CSV</button>
+            <button id="openTemplate" class="ui-btn ui-btn-secondary span-3" type="button">⚙ 自定義表格</button>
+            <button id="clear" class="ui-btn ui-btn-danger span-2" type="button">清除目前結果</button>
+          </div>
+        </div>
+      </section>
 
-    <section id="statusCard" class="card hidden" aria-live="polite">
-      <div class="status-line"><span id="statusDot" class="status-dot"></span><strong id="statusText">等待中</strong></div>
-      <p id="statusDetail" class="hint"></p>
-    </section>
+      <section class="query-panel">
+        <div class="query-grid">
+          <input id="ownerQuery" class="ui-control" placeholder="所有權人" />
+          <input id="ownerIdQuery" class="ui-control" placeholder="所有權人證號" />
+          <input id="addressQuery" class="ui-control" placeholder="地址／地段／地號" />
+          <select id="riskQuery" class="ui-control">
+            <option value="">全部風險</option>
+            <option value="yes">僅顯示風險</option>
+            <option value="no">僅顯示無風險</option>
+          </select>
+          <button id="clearQuery" class="ui-btn ui-btn-secondary" type="button">清除查詢</button>
+        </div>
+      </section>
 
-    <section id="resultCard" class="card result-card hidden">
-      <div class="section-head">
-        <div><h2>辨識結果</h2><p id="resultSummary" class="hint"></p></div>
-        <div class="result-actions">
-          <button id="downloadCsv" class="secondary" type="button">下載 CSV</button>
-          <button id="copyResult" class="secondary" type="button">複製 JSON</button>
+      <div id="statusCard" class="status-card hidden" aria-live="polite">
+        <span id="statusDot" class="status-dot"></span>
+        <div>
+          <strong id="statusText">等待中</strong>
+          <div id="statusDetail" class="status-detail"></div>
         </div>
       </div>
+
       <div id="warningBox" class="warning-box hidden"></div>
-      <div class="table-wrap">
-        <table id="resultTable">
-          <thead><tr>
-            <th>項次</th><th>初審單號</th><th>類型</th><th>所有權人</th><th>所有權人證號</th><th>持分</th>
-            <th>縣市區/地段</th><th>建號:建物門牌 / 地號:地上建號</th><th>主建號/地號</th>
-            <th>【A】主建物概況</th><th>【A】合計主建物(m²)</th><th>【A】合計主建物(坪)</th>
-            <th>【B】共有建物概況</th><th>【B】合計共有面積(m²)</th><th>【B】合計共有面積(坪)</th>
-            <th>【C】車位數</th><th>【C】車權利範圍(累加)</th><th>【C】車位面積(m²)</th><th>【C】車位面積(坪)</th>
-            <th>【D】合計m²(含車)</th><th>合計坪數(含車坪)</th><th>【D】合計m²(不含車)</th><th>合計坪數(不含車)</th>
-            <th>公告現值</th><th>公告地價</th><th>【E】持分後合計m²(含車)</th><th>【E】持分後合計坪(含車)</th>
-            <th>【E】持分後m²(不含車)</th><th>【E】持分後合計坪(不含車)</th><th>純金額提取</th><th>共擔提純 (完整版)</th>
-            <th>設定情形 (H順位)</th><th>備註</th><th>【關鍵】異動索引</th><th>謄本日期</th><th>來源檔案</th><th>建檔日</th>
-          </tr></thead>
+
+      <div class="table-toolbar">
+        <div id="resultSummary" class="summary">尚未解析</div>
+      </div>
+
+      <div id="mainTableContainer" class="table-container">
+        <table id="resultTable" class="result-table">
+          <thead><tr id="resultHead"></tr></thead>
           <tbody id="resultBody"></tbody>
         </table>
       </div>
-      <details class="raw-panel"><summary>查看原始 JSON</summary><pre id="result"></pre></details>
+      <div id="virtualScrollbar" class="virtual-scrollbar"><div id="virtualScrollContent"></div></div>
     </section>
-
-    <footer><p>PDF 僅送往私有後端即時處理；目前不主動保存原始檔。異動索引會在同一批上傳中依地號／建號配對。</p></footer>
   </main>
-  <script src="./app.js?v=20260911-1542" defer></script>
+
+  <div id="modalOverlay" class="modal-overlay" aria-hidden="true">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-icon">◷</span>
+          <div>
+            <h3 id="modalTitle">異動歷程明細</h3>
+            <p id="modalSubtitle">--</p>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button id="exportModalCsv" class="modal-export" type="button">⇩ 匯出 Excel</button>
+          <button id="closeModal" class="modal-close" type="button">×</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <table class="modal-table">
+          <thead><tr>
+            <th>登記次序</th><th>登記日期</th><th>登記原因</th><th>異動別</th>
+            <th>所有權部權利人</th><th>他項權利部權利人</th><th>說明</th><th>部別</th>
+          </tr></thead>
+          <tbody id="modalTbody"></tbody>
+        </table>
+        <div id="modalEmptyState" class="modal-empty hidden">此號碼尚無對應的異動索引資料</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="templateOverlay" class="modal-overlay" aria-hidden="true">
+    <div class="modal-content template-modal">
+      <div class="modal-header">
+        <div><h3>自定義表格</h3><p>勾選要顯示的欄位；設定只保存在本瀏覽器。</p></div>
+        <button id="closeTemplate" class="modal-close" type="button">×</button>
+      </div>
+      <div class="modal-body">
+        <div id="columnChooser" class="column-chooser"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js?v=20260911-1605" defer></script>
 </body>
 </html>
